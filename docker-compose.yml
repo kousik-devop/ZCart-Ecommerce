@@ -1,0 +1,111 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - micro-net
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - micro-net
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - micro-net
+
+  auth-service:
+    build: ./auth
+    container_name: auth-service
+    env_file: ./env/auth.env
+    depends_on:
+      - mongo
+      - rabbitmq
+      - redis
+    ports:
+      - "3000:3000"
+    networks:
+      - micro-net
+
+  product-service:
+    build: ./product
+    container_name: product-service
+    env_file: ./env/product.env
+    depends_on:
+      - mongo
+      - rabbitmq
+      - auth-service
+    ports:
+      - "3001:3001"
+    networks:
+      - micro-net
+
+  cart-service:
+    build: ./cart
+    container_name: cart-service
+    env_file: ./env/cart.env
+    depends_on:
+      - auth-service
+      - product-service
+    ports:
+      - "3002:3002"
+    networks:
+      - micro-net
+
+  order-service:
+    build: ./order
+    container_name: order-service
+    env_file: ./env/order.env
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+      - rabbitmq
+    ports:
+      - "3003:3003"
+    networks:
+      - micro-net
+
+  payment-service:
+    build: ./payment
+    container_name: payment-service
+    env_file: ./env/payment.env
+    depends_on:
+      - order-service
+      - rabbitmq
+    ports:
+      - "3004:3004"
+    networks:
+      - micro-net
+
+  notification-service:
+    build: ./notification
+    container_name: notification-service
+    env_file: ./env/notification.env
+    depends_on:
+      - rabbitmq
+      - order-service
+      - payment-service
+      - auth-service
+      - product-service
+      - cart-service
+    ports:
+      - "3005:3005"
+    networks:
+      - micro-net
+
+networks:
+  micro-net:
+    driver: bridge
