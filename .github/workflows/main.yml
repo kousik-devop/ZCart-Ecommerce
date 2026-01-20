@@ -6,65 +6,112 @@ on:
       - main
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      auth: ${{ steps.filter.outputs.auth }}
+      product: ${{ steps.filter.outputs.product }}
+      cart: ${{ steps.filter.outputs.cart }}
+      order: ${{ steps.filter.outputs.order }}
+      payment: ${{ steps.filter.outputs.payment }}
+      notification: ${{ steps.filter.outputs.notification }}
+      seller: ${{ steps.filter.outputs.seller }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect changed services
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            auth:
+              - 'auth/**'
+            product:
+              - 'product/**'
+            cart:
+              - 'cart/**'
+            order:
+              - 'order/**'
+            payment:
+              - 'payment/**'
+            notification:
+              - 'notification/**'
+            seller:
+              - 'seller/**'
+
   build-push-deploy:
+    needs: detect-changes
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout source code
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Build and push auth service
-      - name: Build & Push Auth Service
+      # Auth
+      - name: Build & Push Auth
+        if: needs.detect-changes.outputs.auth == 'true'
         run: |
-          docker build -t kousikdev/zcart-server-images:auth-1.0 ./auth-service
-          docker push kousikdev/zcart-server-images:auth-1.0
+          docker build -t kousikdev/zcart-server-images:auth-latest ./auth
+          docker push kousikdev/zcart-server-images:auth-latest
 
-      # Build and push product service
-      - name: Build & Push Product Service
+      # Product
+      - name: Build & Push Product
+        if: needs.detect-changes.outputs.product == 'true'
         run: |
-          docker build -t kousikdev/zcart-server-images:product-1.0 ./product-service
-          docker push kousikdev/zcart-server-images:product-1.0
+          docker build -t kousikdev/zcart-server-images:product-latest ./product
+          docker push kousikdev/zcart-server-images:product-latest
 
-      # Build and push cart service
-      - name: Build & Push Cart Service
+      # Cart
+      - name: Build & Push Cart
+        if: needs.detect-changes.outputs.cart == 'true'
         run: |
-          docker build -t kousikdev/zcart-server-images:cart-1.0 ./cart-service
-          docker push kousikdev/zcart-server-images:cart-1.0
+          docker build -t kousikdev/zcart-server-images:cart-latest ./cart
+          docker push kousikdev/zcart-server-images:cart-latest
 
-      # Build and push order service
-      - name: Build & Push Order Service
+      # Order
+      - name: Build & Push Order
+        if: needs.detect-changes.outputs.order == 'true'
         run: |
-          docker build -t kousikdev/zcart-server-images:order-1.0 ./order-service
-          docker push kousikdev/zcart-server-images:order-1.0
+          docker build -t kousikdev/zcart-server-images:order-latest ./order
+          docker push kousikdev/zcart-server-images:order-latest
 
-      # Build and push payment service
-      - name: Build & Push Payment Service
+      # Payment
+      - name: Build & Push Payment
+        if: needs.detect-changes.outputs.payment == 'true'
         run: |
-          docker build -t kousikdev/zcart-server-images:payment-1.0 ./payment-service
-          docker push kousikdev/zcart-server-images:payment-1.0
+          docker build -t kousikdev/zcart-server-images:payment-latest ./payment
+          docker push kousikdev/zcart-server-images:payment-latest
 
-      # Build and push notification service
-      - name: Build & Push Notification Service
+      # Notification
+      - name: Build & Push Notification
+        if: needs.detect-changes.outputs.notification == 'true'
         run: |
-          docker build -t kousikdev/zcart-server-images:notification-1.1 ./notification-service
-          docker push kousikdev/zcart-server-images:notification-1.1
+          docker build -t kousikdev/zcart-server-images:notification-latest ./notification
+          docker push kousikdev/zcart-server-images:notification-latest
 
-      # Build and push seller service
-      - name: Build & Push Seller Service
+      # Seller
+      - name: Build & Push Seller
+        if: needs.detect-changes.outputs.seller == 'true'
         run: |
-          docker build -t kousikdev/zcart-server-images:seller-1.0 ./seller-service
-          docker push kousikdev/zcart-server-images:seller-1.0
+          docker build -t kousikdev/zcart-server-images:seller-latest ./seller
+          docker push kousikdev/zcart-server-images:seller-latest
 
-      # Deploy to server via SSH
+      # Deploy only once
       - name: Deploy to Server
+        if: |
+          needs.detect-changes.outputs.auth == 'true' ||
+          needs.detect-changes.outputs.product == 'true' ||
+          needs.detect-changes.outputs.cart == 'true' ||
+          needs.detect-changes.outputs.order == 'true' ||
+          needs.detect-changes.outputs.payment == 'true' ||
+          needs.detect-changes.outputs.notification == 'true' ||
+          needs.detect-changes.outputs.seller == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -73,5 +120,4 @@ jobs:
           script: |
             cd ZCart-Ecommerce
             docker-compose pull
-            docker-compose down
             docker-compose up -d
