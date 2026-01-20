@@ -50,7 +50,7 @@ tmp/
 
 .history/
 
-**/tests/
+**/tests
 **/README.md
 **/src/tests/
 **/test/

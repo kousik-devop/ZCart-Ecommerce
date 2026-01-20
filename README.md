@@ -1,43 +1,95 @@
 🛒 ZCart – Microservice Based E-Commerce Backend
 
-ZCart is a microservice-based backend platform designed for scalable e-commerce applications.
-Each core domain is implemented as an independent Node.js service, communicating asynchronously via RabbitMQ, using MongoDB for persistence and Redis for caching/session management.
+ZCart is a production-ready, microservice-based backend platform designed for scalable e-commerce applications.
+Each core domain is implemented as an independent Node.js service, containerized with Docker, deployed on AWS EC2, and automatically delivered using GitHub Actions CI/CD.
+NGINX is used as a reverse proxy and API gateway.
+
+---
 
 📌 Tech Stack
 
-Backend: Node.js, Express
+Backend: Node.js, Express  
+Database: MongoDB (per service)  
+Message Broker: RabbitMQ (AMQP)  
+Cache / Session: Redis  
+Containerization: Docker, Docker Compose  
+CI/CD: GitHub Actions  
+Cloud: AWS EC2  
+Reverse Proxy: NGINX  
+Architecture: Microservices  
 
-Database: MongoDB (per service)
-
-Message Broker: RabbitMQ (AMQP)
-
-Cache / Session: Redis
-
-Containerization: Docker, Docker Compose
-
-Architecture: Microservices
+---
 
 🧱 Architecture Overview
 
-Each service runs independently with its own database and responsibilities.
+Each service runs independently in its own Docker container and communicates asynchronously via RabbitMQ.
 
-Service	Responsibility	Default Port
-Auth	User registration, login, JWT handling	3000
-Product	Product listing & management	3001
-Cart	Shopping cart operations	5002
-Order	Order creation, update, retrieval	3003
-Payment	Payment processing	3004
-Notification	Email / notification consumer & producer	5000
+Service | Responsibility | Internal Port
+--- | --- | ---
+Auth | User registration, login, JWT handling | 3000
+Product | Product listing & management | 3001
+Cart | Shopping cart operations | 3002
+Order | Order creation & tracking | 3003
+Payment | Payment processing | 3004
+Notification | Email / notification service | 3005
+Seller | Seller management | 3006
 
-Infrastructure Services
+Infrastructure Services:
+- MongoDB – Persistent storage
+- RabbitMQ – Event-based communication
+- Redis – Caching & session management
 
-MongoDB – Persistent storage
+---
 
-RabbitMQ – Event-based communication
+🌐 Live Backend URLs (Deployed on AWS EC2)
 
-Redis – Caching & session storage (used by Auth)
+Public Server IP:
+43.205.191.46
+
+
+### 🔀 NGINX API Gateway (Recommended)
+
+Base URL:
+http://43.205.191.46:8080
+
+yaml
+কোড কপি করুন
+
+Example routes:
+http://43.205.191.46:8080/auth
+http://43.205.191.46:8080/products
+http://43.205.191.46:8080/cart
+http://43.205.191.46:8080/orders
+http://43.205.191.46:8080/payments
+
+
+---
+
+### 🔗 Direct Service URLs (Development / Debug)
+
+Service | URL
+--- | ---
+Auth | http://43.205.191.46:3000
+Product | http://43.205.191.46:3001
+Cart | http://43.205.191.46:3002
+Order | http://43.205.191.46:3003
+Payment | http://43.205.191.46:3004
+Notification | http://43.205.191.46:3005
+Seller | http://43.205.191.46:3006
+
+---
+
+### 🐰 RabbitMQ Management UI
+
+http://43.205.191.46:15673
+Username: guest
+Password: guest
+
+
+---
 
 📂 Repository Structure
+
 ZCart-Ecommerce/
 │
 ├── auth/
@@ -46,151 +98,108 @@ ZCart-Ecommerce/
 ├── order/
 ├── payment/
 ├── notification/
+├── seller/
 │
 ├── env/
-│   ├── auth.env
-│   ├── product.env
-│   ├── cart.env
-│   ├── order.env
-│   ├── payment.env
-│   └── notification.env
+│ ├── auth.env
+│ ├── product.env
+│ ├── cart.env
+│ ├── order.env
+│ ├── payment.env
+│ ├── notification.env
+│ └── seller.env
+│
+├── nginx/
+│ └── nginx.conf
 │
 ├── docker-compose.yml
 └── README.md
 
+---
+
 🔑 Environment Variables
-Global Variables
+
+### Common Variables
+
 MONGO_URI=mongodb://mongo:27017/<DB_NAME>
 RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
 REDIS_HOST=redis
 REDIS_PORT=6379
 REDIS_PASSWORD=
 
-Service-Specific Examples
-Auth (env/auth.env)
+
+### Auth Service (env/auth.env)
+
 PORT=3000
 MONGO_URI=mongodb://mongo:27017/ZCart_Auth
 RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
 REDIS_HOST=redis
 REDIS_PORT=6379
-REDIS_PASSWORD=
 JWT_SECRET=your_jwt_secret
 
-Product (env/product.env)
-PORT=3001
-MONGO_URI=mongodb://mongo:27017/ZCart_Product
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
 
-Cart (env/cart.env)
-PORT=5002
-MONGO_URI=mongodb://mongo:27017/ZCart_Cart
+(Other services follow the same pattern with their own DB names.)
 
-Order (env/order.env)
-PORT=3003
-MONGO_URI=mongodb://mongo:27017/ZCart_Order
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+---
 
-Payment (env/payment.env)
-PORT=3004
-MONGO_URI=mongodb://mongo:27017/ZCart_Payment
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+🚀 Deployment & CI/CD Flow
 
-Notification (env/notification.env)
-PORT=5000
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+1. Code pushed to `main` branch
+2. GitHub Actions pipeline:
+   - Builds Docker images
+   - Pushes images to Docker Hub
+   - SSH deploys to AWS EC2
+3. Docker Compose pulls latest images
+4. NGINX routes traffic to services
 
-🚀 Running the Full Backend (Docker Compose)
-Prerequisites
+---
 
-Docker
+▶️ Manual Deployment (First Time Only)
 
-Docker Compose
-
-Start All Services
-docker-compose up --build
-
-Run in Detached Mode
-docker-compose up -d --build
-
-View Logs
-docker-compose logs -f auth
-docker-compose logs -f rabbitmq
-
-Stop & Clean Containers
-docker-compose down -v
-
-▶️ Running a Single Service (Example: Auth)
-Build Image
-docker build -t zcart-auth ./auth
-
-Run Container
-docker run --rm -p 3000:3000 \
-  -e MONGO_URI="mongodb://mongo:27017/ZCart_Auth" \
-  -e RABBITMQ_URL="amqp://guest:guest@rabbitmq:5672" \
-  -e REDIS_HOST="redis" \
-  zcart-auth
+docker-compose pull
+docker-compose up -d
 
 
-⚠️ When running individually, ensure MongoDB, RabbitMQ, and Redis are already running or available on the same Docker network.
+---
 
-🛠️ Important Files to Read First
+🧪 Health & Debugging
 
-auth/server.js – Auth service entry point
+Check containers:
+docker ps
 
-auth/src/app.js – Middleware & routing
 
-*/src/db/db.js – MongoDB connection helper
+Check logs:
+docker logs auth-service
+docker logs nginx
 
-*/src/broker/broker.js – RabbitMQ connection & retry logic
 
-docker-compose.yml – Service orchestration
+Check from server:
+curl http://localhost:3000
 
-🧪 Troubleshooting
 
-RabbitMQ connection fails on startup
-→ Wait a few seconds; services retry until RabbitMQ is ready.
-
-MongoDB connection error
-→ Ensure MONGO_URI hostname matches the compose service name (mongo).
-
-Service unreachable
-→ Run docker-compose ps and check exposed ports.
+---
 
 🔐 Security Notes
 
-❌ Do not commit real secrets
+❌ Do not commit real secrets  
+✅ Use env files (git-ignored)  
+✅ Restrict direct service ports in production  
+✅ Expose only NGINX (80 / 443) publicly  
 
-✅ Use .env files (git-ignored)
-
-✅ Prefer secrets managers in production
-
-🧩 Extending the Platform
-
-Add new services in docker-compose.yml
-
-Each service should have:
-
-Dockerfile
-
-Independent database
-
-Optional RabbitMQ events
-
-Add env/*.env.example for contributors
+---
 
 📌 Future Enhancements
 
-API Gateway
+- HTTPS with SSL (Certbot)
+- API Gateway improvements
+- Centralized logging (ELK)
+- Kubernetes (EKS)
+- Rate limiting & auth middleware
+- Blue-Green deployments
 
-Centralized logging (ELK)
-
-Distributed tracing
-
-Kubernetes deployment
-
-CI/CD pipeline
+---
 
 👤 Author
 
-Kousik Maiti
-Microservice • Backend • Cloud • Docker • Node.js
+Kousik Maiti  
+Microservices • Backend • Docker • Cloud • Node.js

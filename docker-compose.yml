@@ -29,7 +29,7 @@ services:
       - micro-net
 
   auth-service:
-    image: kousikdev/zcart-server-images:auth-1.0
+    image: kousikdev/zcart-server-images:auth-latest
     container_name: auth-service
     restart: always
     env_file: ./env/auth.env
@@ -43,7 +43,7 @@ services:
       - micro-net
 
   product-service:
-    image: kousikdev/zcart-server-images:product-1.0
+    image: kousikdev/zcart-server-images:product-latest
     container_name: product-service
     restart: always
     env_file: ./env/product.env
@@ -57,7 +57,7 @@ services:
       - micro-net
 
   cart-service:
-    image: kousikdev/zcart-server-images:cart-1.0
+    image: kousikdev/zcart-server-images:cart-latest
     container_name: cart-service
     restart: always
     env_file: ./env/cart.env
@@ -70,7 +70,7 @@ services:
       - micro-net
 
   order-service:
-    image: kousikdev/zcart-server-images:order-1.0
+    image: kousikdev/zcart-server-images:order-latest
     container_name: order-service
     restart: always
     env_file: ./env/order.env
@@ -85,7 +85,7 @@ services:
       - micro-net
 
   payment-service:
-    image: kousikdev/zcart-server-images:payment-1.0
+    image: kousikdev/zcart-server-images:payment-latest
     container_name: payment-service
     restart: always
     env_file: ./env/payment.env
@@ -98,7 +98,7 @@ services:
       - micro-net
 
   notification-service:
-    image: kousikdev/zcart-server-images:notification-1.1
+    image: kousikdev/zcart-server-images:notification-latest
     container_name: notification-service
     restart: always
     env_file: ./env/notification.env
@@ -115,7 +115,7 @@ services:
       - micro-net
 
   seller-service:
-    image: kousikdev/zcart-server-images:seller-1.0
+    image: kousikdev/zcart-server-images:seller-latest
     container_name: seller-service
     restart: always
     env_file: ./env/seller.env
