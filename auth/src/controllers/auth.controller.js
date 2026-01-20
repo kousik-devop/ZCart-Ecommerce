@@ -48,7 +48,7 @@ const register = async (req, res) => {
         ]);
 
         const token = jwt.sign(
-            { userId: newUser._id, username: newUser.username, role: newUser.role },
+            { userId: newUser._id, username: newUser.username, role: newUser.role, email: newUser.email},
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -80,6 +80,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try{
         const { email, password } = req.body;
+        
         const user = await User.findOne({ email }).select('+password');
 
         if (!user) {
@@ -92,7 +93,7 @@ const login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user._id, username: user.username, role: user.role,email: user.email},
+            { userId: user._id, username: user.username, role: user.role, email: user.email},
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );

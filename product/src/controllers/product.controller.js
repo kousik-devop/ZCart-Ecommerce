@@ -1,18 +1,20 @@
 const productModel = require('../models/product.model');
 const { uploadImage, deleteImage } = require('../services/imagekit.service');
 const mongoose = require('mongoose');
+const {publishToQueue} = require('../broker/broker');
 
 async function createProduct(req, res) {
     try {
         const { title, description, priceAmount, priceCurrency = 'INR' } = req.body;
 
         // ✅ SAFETY CHECK
-        if (!req.user || !req.user.id) {
+        if (!req.user) {
             return res.status(401).json({
                 message: "Unauthorized: seller not found"
             });
         }
-        const seller = req.user.id; // Extract seller from authenticated user
+
+        const seller = req.user.userId; // Extract seller from authenticated user
 
         const price = {
             amount: Number(priceAmount),
@@ -24,12 +26,20 @@ async function createProduct(req, res) {
 
         const product = await productModel.create({ title, description, price, seller, images });
 
+        await publishToQueue("PRODUCT_SELLER_DASHBOARD.PRODUCT_CREATED", product);
+        await publishToQueue("PRODUCT_NOTIFICATION.PRODUCT_CREATED", {
+            email: req.user.email,
+            productId: product._id,
+            sellerId: seller,
+        });
+
     
 
         return res.status(201).json({
             message: 'Product created',
             data: product,
         });
+
     } catch (err) {
         console.error('Create product error', err);
         return res.status(500).json({ message: 'Internal server error' });

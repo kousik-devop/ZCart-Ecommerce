@@ -1,7 +1,8 @@
 const express = require('express');
-const app = express();
 const cookieParser = require('cookie-parser');
-const orderRoutes = require("./routes/order.routes")
+const sellerRoutes = require('./routes/seller.routes');
+const app = express();
+
 const cors = require('cors');
 
 app.use(cors({
@@ -13,16 +14,16 @@ app.use(cors({
   credentials: true
 }));
 
+
 app.use(express.json());
 app.use(cookieParser());
 
 
 app.get('/', (req, res) => {
-    res.status(200).json({
-        message: "Order service is running"
-    });
-})
+    res.status(200).json({ message: 'Seller Dashboard Service is running.' });
+});
 
-app.use("/api/orders", orderRoutes)
+app.use("/api/seller/dashboard", sellerRoutes);
+
 
 module.exports = app;

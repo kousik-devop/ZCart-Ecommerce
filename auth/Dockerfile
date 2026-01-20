@@ -3,21 +3,23 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /usr/src/app
 
-# Use production mode
+# Production mode
 ENV NODE_ENV=production
 
-# Install only production dependencies
+# Copy package files first (cache optimization)
 COPY package*.json ./
+
+# Install only production deps
 RUN npm ci --only=production
 
-# Copy source code
+# Copy app source
 COPY . .
 
-# Create and use non-root user (security best practice)
+# Create non-root user
 RUN addgroup -S app && adduser -S app -G app
 USER app
 
-# Expose Auth service port
+# Expose correct port (must match server.js)
 EXPOSE 3000
 
 # Start Auth service

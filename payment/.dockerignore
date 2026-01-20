@@ -1,13 +1,22 @@
+# Dependencies & logs
 node_modules
 npm-debug.log
+*.log
+
+# VCS / editor files
 .git
 .gitignore
-README.md
-.env
-.env.local
 .vscode
 .idea
 .DS_Store
-src/tests
+
+# Environment files (NEVER inside image)
+.env
+.env.local
+
+# Tests & coverage (outside src)
+tests
 coverage
-*.log
+
+# Docs (optional)
+README.md
