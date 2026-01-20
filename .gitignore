@@ -49,3 +49,8 @@ tmp/
 .cache/
 
 .history/
+
+**/tests/
+**/README.md
+**/src/tests/
+**/test/
