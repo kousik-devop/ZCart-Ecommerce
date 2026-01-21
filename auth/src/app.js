@@ -4,10 +4,14 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth.route');
 const cors = require('cors');
 
-app.use(cors({
-  origin: "http://127.0.0.1:5000/",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5000", 
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
