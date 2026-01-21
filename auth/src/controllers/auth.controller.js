@@ -69,7 +69,8 @@ const register = async (req, res) => {
                 email: newUser.email,
                 fullname: newUser.firstname + ' ' + newUser.lastname,
                 role: newUser.role
-            }
+            },
+            token: token
         });
 
     } catch (error) {
@@ -115,7 +116,8 @@ const login = async (req, res) => {
                 fullname: user.firstname + ' ' + user.lastname,
                 role: user.role,
                 address: user.address
-            }
+            },
+            token: token
          });
     } catch (error) {
         console.error(error);
