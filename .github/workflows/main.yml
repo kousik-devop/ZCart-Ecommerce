@@ -119,5 +119,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ZCart-Ecommerce
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
+            docker compose up -d
