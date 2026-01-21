@@ -9,6 +9,7 @@ const COOKIE_OPTIONS = {
     httpOnly: true,
     secure: false,
     sameSite: 'none',
+    domain: '43.205.191.46',
     path: '/',
     maxAge: 7 * 24 * 60 * 60 * 1000
 };
