@@ -1,0 +1,618 @@
+=================================================================================
+                    MICROSERVICE BASED PLATFORM - API ENDPOINTS
+                            (PRODUCTION DEPLOYMENT)
+=================================================================================
+
+📌 SERVER BASE URLS (Deployed on AWS EC2: 43.205.191.46)
+
+Service | Local Port | Production URL
+---------|-----------|------------------
+Auth | 3000 | http://43.205.191.46:3000
+Product | 3001 | http://43.205.191.46:3001
+Cart | 3002 | http://43.205.191.46:3002
+Order | 3003 | http://43.205.191.46:3003
+Payment | 3004 | http://43.205.191.46:3004
+Notification | 3005 | http://43.205.191.46:3005
+Seller Dashboard | 3006 | http://43.205.191.46:3006
+
+🔀 NGINX API Gateway (Recommended)
+Base URL: http://43.205.191.46:8080
+
+=================================================================================
+SERVICE 1: AUTH MICROSERVICE
+Local: http://localhost:3000/api/auth
+Production: http://43.205.191.46:3000/api/auth
+=================================================================================
+
+1. POST /register
+   Full URL: http://43.205.191.46:3000/api/auth/register
+   Description: Register a new user account
+   Method: POST
+   Auth Required: NO
+   Role Required: NONE
+   Request Headers:
+     - Content-Type: application/json
+   Request Body:
+     {
+       "email": "user@example.com",
+       "password": "securePassword123",
+       "firstName": "John",
+       "lastName": "Doe"
+     }
+   Validators: User Registration Validator
+   Response: JWT Token, User ID, User Details
+
+2. POST /login
+   Full URL: http://43.205.191.46:3000/api/auth/login
+   Description: Authenticate user and get JWT token
+   Method: POST
+   Auth Required: NO
+   Role Required: NONE
+   Request Headers:
+     - Content-Type: application/json
+   Request Body:
+     {
+       "email": "user@example.com",
+       "password": "securePassword123"
+     }
+   Validators: User Login Validator
+   Response: JWT Token, User Details
+
+3. GET /me
+   Full URL: http://43.205.191.46:3000/api/auth/me
+   Description: Get current authenticated user profile
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: NONE
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     OR
+     - Cookie: authToken=<JWT_TOKEN>
+   Response: User Profile Data
+
+4. GET /logout
+   Full URL: http://43.205.191.46:3000/api/auth/logout
+   Description: Logout user and clear authentication session
+   Method: GET
+   Auth Required: NO
+   Role Required: NONE
+   Response: Logout Confirmation
+
+5. POST /users/me/addresses
+   Full URL: http://43.205.191.46:3000/api/auth/users/me/addresses
+   Description: Add new delivery address to user account
+   Method: POST
+   Auth Required: YES (JWT Token)
+   Role Required: NONE
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "street": "123 Main St",
+       "city": "New York",
+       "state": "NY",
+       "zipCode": "10001",
+       "country": "USA",
+       "isDefault": true
+     }
+   Validators: Address Validator
+   Response: Address ID, Address Details
+
+6. GET /users/me/addresses
+   Full URL: http://43.205.191.46:3000/api/auth/users/me/addresses
+   Description: Retrieve all saved addresses for user
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: NONE
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Array of Addresses
+
+7. DELETE /users/me/addresses/:addressId
+   Full URL: http://43.205.191.46:3000/api/auth/users/me/addresses/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Delete a specific address
+   Method: DELETE
+   Auth Required: YES (JWT Token)
+   Role Required: NONE
+   Path Parameters:
+     - addressId: MongoDB ObjectId (required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Deletion Confirmation
+
+
+=================================================================================
+SERVICE 2: PRODUCT MICROSERVICE
+Local: http://localhost:3001/api/products
+Production: http://43.205.191.46:3001/api/products
+=================================================================================
+
+1. POST /
+   Full URL: http://43.205.191.46:3001/api/products
+   Description: Create a new product (Seller/Admin only)
+   Method: POST
+   Auth Required: YES (JWT Token)
+   Role Required: seller OR admin
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: multipart/form-data
+   Request Body (Form Data):
+     - name: "Product Name"
+     - description: "Product Description"
+     - price: 99.99
+     - category: "Electronics"
+     - stock: 50
+     - images: [File1, File2, File3] (Max 5 files)
+   File Upload: Images (multipart/form-data, max 5 files)
+   Validators: Product Creation Validators
+   Response: Product ID, Product Details
+
+2. GET /
+   Full URL: http://43.205.191.46:3001/api/products
+   Description: Get all products (Public, No auth required)
+   Method: GET
+   Auth Required: NO
+   Role Required: NONE
+   Query Parameters:
+     - page: integer (pagination)
+     - limit: integer (items per page)
+     - category: string (filter by category)
+     - search: string (search by name/description)
+   Response: Array of Products with Pagination
+
+3. GET /seller
+   Full URL: http://43.205.191.46:3001/api/products/seller
+   Description: Get all products created by authenticated seller
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: seller
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Array of Seller's Products
+
+4. GET /:id
+   Full URL: http://43.205.191.46:3001/api/products/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Get detailed information about a specific product
+   Method: GET
+   Auth Required: NO
+   Role Required: NONE
+   Path Parameters:
+     - id: MongoDB ObjectId (required)
+   Response: Complete Product Details
+
+5. PATCH /:id
+   Full URL: http://43.205.191.46:3001/api/products/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Update product details (Seller only)
+   Method: PATCH
+   Auth Required: YES (JWT Token)
+   Role Required: seller
+   Path Parameters:
+     - id: MongoDB ObjectId (required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "name": "Updated Name",
+       "price": 89.99,
+       "stock": 100,
+       "description": "Updated description"
+     }
+   Response: Updated Product Details
+
+6. DELETE /:id
+   Full URL: http://43.205.191.46:3001/api/products/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Delete a product (Seller only)
+   Method: DELETE
+   Auth Required: YES (JWT Token)
+   Role Required: seller
+   Path Parameters:
+     - id: MongoDB ObjectId (required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Deletion Confirmation
+
+
+=================================================================================
+SERVICE 3: CART MICROSERVICE
+Local: http://localhost:3002/api/cart
+Production: http://43.205.191.46:3002/api/cart
+=================================================================================
+
+1. POST /items
+   Full URL: http://43.205.191.46:3002/api/cart/items
+   Description: Add item to shopping cart
+   Method: POST
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "productId": "603f8c1a2e5e8f1a4c8e9e1f",
+       "quantity": 2,
+       "price": 99.99
+     }
+   Validators: Add Item to Cart Validator
+   Response: Cart Item Details, Updated Cart
+
+2. GET /
+   Full URL: http://43.205.191.46:3002/api/cart
+   Description: Retrieve all items in user's shopping cart
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response:
+     {
+       "cartId": "...",
+       "userId": "...",
+       "items": [
+         {
+           "productId": "...",
+           "quantity": 2,
+           "price": 99.99,
+           "total": 199.98
+         }
+       ],
+       "totalPrice": 199.98
+     }
+
+3. PATCH /:productId
+   Full URL: http://43.205.191.46:3002/api/cart/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Update quantity of item in cart
+   Method: PATCH
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Path Parameters:
+     - productId: MongoDB ObjectId (required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "quantity": 5
+     }
+   Validators: Update Cart Item Validator
+   Response: Updated Cart Item, Updated Cart
+
+4. DELETE /:productId
+   Full URL: http://43.205.191.46:3002/api/cart/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Remove item from shopping cart
+   Method: DELETE
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Path Parameters:
+     - productId: MongoDB ObjectId (required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Deletion Confirmation, Updated Cart
+
+
+=================================================================================
+SERVICE 4: ORDER MICROSERVICE
+Local: http://localhost:3003/api/orders
+Production: http://43.205.191.46:3003/api/orders
+=================================================================================
+
+1. POST /
+   Full URL: http://43.205.191.46:3003/api/orders
+   Description: Create a new order from cart items
+   Method: POST
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "items": [
+         {
+           "productId": "603f8c1a2e5e8f1a4c8e9e1f",
+           "quantity": 2,
+           "price": 99.99
+         }
+       ],
+       "shippingAddress": "603f8c1a2e5e8f1a4c8e9e1f",
+       "totalPrice": 199.98
+     }
+   Validators: Create Order Validation
+   Response: Order ID, Order Details, Order Status
+
+2. GET /me
+   Full URL: http://43.205.191.46:3003/api/orders/me
+   Description: Get all orders for authenticated user
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Query Parameters:
+     - status: string (pending, processing, shipped, delivered, cancelled)
+     - page: integer (pagination)
+   Response: Array of User's Orders
+
+3. GET /seller
+   Full URL: http://43.205.191.46:3003/api/orders/seller
+   Description: Get all orders for authenticated seller
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: seller
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Array of Seller's Orders
+
+4. POST /:id/cancel
+   Full URL: http://43.205.191.46:3003/api/orders/603f8c1a2e5e8f1a4c8e9e1f/cancel
+   Description: Cancel an order (User only)
+   Method: POST
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Path Parameters:
+     - id: MongoDB ObjectId (Order ID, required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Request Body:
+     {
+       "reason": "Changed my mind"
+     }
+   Response: Cancellation Confirmation, Updated Order Status
+
+5. PATCH /:id/address
+   Full URL: http://43.205.191.46:3003/api/orders/603f8c1a2e5e8f1a4c8e9e1f/address
+   Description: Update delivery address for an order
+   Method: PATCH
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Path Parameters:
+     - id: MongoDB ObjectId (Order ID, required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "street": "456 Oak Ave",
+       "city": "Los Angeles",
+       "state": "CA",
+       "zipCode": "90001"
+     }
+   Validators: Update Address Validation
+   Response: Updated Order Details
+
+6. GET /:id
+   Full URL: http://43.205.191.46:3003/api/orders/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Get specific order details by ID
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: user OR admin
+   Path Parameters:
+     - id: MongoDB ObjectId (Order ID, required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Complete Order Details including Items, Shipping, Status
+
+
+=================================================================================
+SERVICE 5: PAYMENT MICROSERVICE
+Local: http://localhost:3004/api/payments
+Production: http://43.205.191.46:3004/api/payments
+=================================================================================
+
+1. POST /create/:orderId
+   Full URL: http://43.205.191.46:3004/api/payments/create/603f8c1a2e5e8f1a4c8e9e1f
+   Description: Create payment session for an order
+   Method: POST
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Path Parameters:
+     - orderId: MongoDB ObjectId (required)
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "amount": 199.98,
+       "currency": "USD",
+       "paymentMethod": "credit_card"
+     }
+   Response: Payment Session ID, Payment URL, Payment Token
+
+2. POST /verify
+   Full URL: http://43.205.191.46:3004/api/payments/verify
+   Description: Verify and complete payment transaction
+   Method: POST
+   Auth Required: YES (JWT Token)
+   Role Required: user
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+     - Content-Type: application/json
+   Request Body:
+     {
+       "paymentId": "pay_1234567890",
+       "transactionId": "txn_1234567890",
+       "status": "success"
+     }
+   Response: Payment Confirmation, Transaction Details, Order Status Update
+
+
+=================================================================================
+SERVICE 6: SELLER DASHBOARD MICROSERVICE
+Local: http://localhost:3006/api/seller/dashboard
+Production: http://43.205.191.46:3006/api/seller/dashboard
+=================================================================================
+
+1. GET /metrics
+   Full URL: http://43.205.191.46:3006/api/seller/dashboard/metrics
+   Description: Get seller dashboard metrics and analytics
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: seller
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response:
+     {
+       "totalSales": 5000,
+       "totalOrders": 25,
+       "totalProducts": 50,
+       "revenue": 5000,
+       "conversionRate": 12.5
+     }
+
+2. GET /orders
+   Full URL: http://43.205.191.46:3006/api/seller/dashboard/orders
+   Description: Get seller's orders with status and details
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: seller
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Query Parameters:
+     - status: string (pending, processing, shipped)
+     - page: integer
+   Response: Array of Seller's Orders
+
+3. GET /products
+   Full URL: http://43.205.191.46:3006/api/seller/dashboard/products
+   Description: Get all products created by seller
+   Method: GET
+   Auth Required: YES (JWT Token)
+   Role Required: seller
+   Request Headers:
+     - Authorization: Bearer <JWT_TOKEN>
+   Response: Array of Seller's Products with Performance Metrics
+
+
+=================================================================================
+SERVICE 7: NOTIFICATION SERVICE
+Local: http://localhost:3005
+Production: http://43.205.191.46:3005
+Note: Event-driven service using RabbitMQ message broker
+=================================================================================
+
+No direct HTTP API endpoints exposed.
+Communication: RabbitMQ message broker for event-driven notifications
+Events Handled:
+  - User Registration → Send Welcome Email
+  - Order Created → Send Order Confirmation Email
+  - Order Status Changed → Send Status Update Email
+  - Payment Completed → Send Payment Receipt Email
+
+RabbitMQ Management UI: http://43.205.191.46:15673
+Username: guest
+Password: guest
+
+
+=================================================================================
+AUTHENTICATION & AUTHORIZATION
+=================================================================================
+
+Authentication Method: JWT (JSON Web Token)
+
+Token Format:
+  Header: Authorization: Bearer <JWT_TOKEN>
+  OR
+  Cookie: authToken=<JWT_TOKEN>
+
+User Roles:
+  - user: Regular customer
+  - seller: Product seller/vendor
+  - admin: Platform administrator
+
+Role-Based Access Control (RBAC):
+  Public Endpoints (No Auth):
+    - Auth: /register, /login, /logout
+    - Product: GET /
+
+  User-Only Endpoints:
+    - Cart: All endpoints (GET, POST, PATCH, DELETE)
+    - Order: POST /, GET /me, POST /:id/cancel, PATCH /:id/address, GET /:id
+    - Payment: POST /create/:orderId, POST /verify
+
+  Seller-Only Endpoints:
+    - Product: POST /, GET /seller, PATCH /:id, DELETE /:id
+    - Order: GET /seller
+    - Seller Dashboard: All endpoints (GET /metrics, GET /orders, GET /products)
+
+  Admin-Only Endpoints:
+    - Order: GET /:id
+
+
+=================================================================================
+COMMON REQUEST/RESPONSE PATTERNS
+=================================================================================
+
+Standard Request Headers:
+  - Content-Type: application/json (for JSON payloads)
+  - Content-Type: multipart/form-data (for file uploads)
+  - Authorization: Bearer <JWT_TOKEN> (for protected routes)
+  - Cookie: authToken=<JWT_TOKEN> (alternative auth method)
+
+Standard Error Response Format:
+  {
+    "success": false,
+    "message": "Error description",
+    "errors": [
+      {
+        "field": "email",
+        "message": "Email is required"
+      }
+    ]
+  }
+
+Standard Success Response Format:
+  {
+    "success": true,
+    "message": "Operation successful",
+    "data": { ... }
+  }
+
+
+=================================================================================
+VALIDATORS USED
+=================================================================================
+
+Auth Service:
+  - User Registration Validator: email, password, firstName, lastName
+  - User Login Validator: email, password
+  - Address Validator: street, city, state, zipCode, country
+
+Cart Service:
+  - Add Item Validator: productId, quantity
+  - Update Cart Item Validator: quantity
+
+Order Service:
+  - Create Order Validator: items, shippingAddress, totalPrice
+  - Update Address Validator: street, city, state, zipCode
+
+Product Service:
+  - Product Creation Validators: name, price, category, stock, description
+
+
+=================================================================================
+SUMMARY
+=================================================================================
+
+Total Services: 7 (Auth, Product, Cart, Order, Payment, Seller Dashboard, Notification)
+Total HTTP Endpoints: 26
+Public Endpoints: 2 (Auth: /register, /login)
+Protected Endpoints: 24
+
+Service Breakdown:
+  ✓ Auth Service: 7 endpoints
+  ✓ Product Service: 6 endpoints
+  ✓ Cart Service: 4 endpoints
+  ✓ Order Service: 6 endpoints
+  ✓ Payment Service: 2 endpoints
+  ✓ Seller Dashboard: 3 endpoints
+  ✓ Notification Service: Event-driven (no HTTP endpoints)
+
+Database: MongoDB (per-service)
+Message Broker: RabbitMQ
+Cache/Sessions: Redis
+Deployment: Docker on AWS EC2 (43.205.191.46)
+API Gateway: NGINX (Port 8080)
+
+=================================================================================

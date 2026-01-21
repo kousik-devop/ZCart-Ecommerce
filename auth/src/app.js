@@ -5,7 +5,7 @@ const authRoutes = require('./routes/auth.route');
 const cors = require('cors');
 
 app.use(cors({
-  origin: true,
+  origin: "http://127.0.0.1:5000/",
   credentials: true
 }));
 
