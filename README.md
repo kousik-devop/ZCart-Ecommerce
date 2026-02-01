@@ -1,207 +1,112 @@
-🛒 ZCart – Microservice Based E-Commerce Backend
+<div align="center">
+  <br />
+  <br />
 
-ZCart is a production-ready, microservice-based backend platform designed for scalable e-commerce applications.
-Each core domain is implemented as an independent Node.js service, containerized with Docker, deployed on AWS EC2, and automatically delivered using GitHub Actions CI/CD.
-NGINX is used as a reverse proxy and API gateway.
+  <h3 align="center">ZCart – Microservice Based E-Commerce Backend</h3>
+  <div>
+    <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white">
+    <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white">
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+    <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white">
+    <img src="https://img.shields.io/badge/NGINX-009639?style=for-the-badge&logo=nginx&logoColor=white">
+  </div>
+
+   <div align="center">
+     A scalable, production-style e-commerce backend built using Node.js
+     microservices, Docker, message queues, and API gateway architecture.
+    </div>
+</div>
 
 ---
 
-📌 Tech Stack
+## 📋 <a name="table">Table of Contents</a>
 
-Backend: Node.js, Express  
-Database: MongoDB (per service)  
-Message Broker: RabbitMQ (AMQP)  
-Cache / Session: Redis  
-Containerization: Docker, Docker Compose  
-CI/CD: GitHub Actions  
-Cloud: AWS EC2  
-Reverse Proxy: NGINX  
-Architecture: Microservices  
+1. ✨ [Introduction](#introduction)
+2. ⚙️ [Tech Stack](#tech-stack)
+3. 🧱 [Architecture](#architecture)
+4. 🔋 [Features](#features)
+5. 🤸 [Quick Start](#quick-start)
+6. 🎥 [Demo](#demo)
+7. 🚀 [More](#more)
 
 ---
 
-🧱 Architecture Overview
+## <a name="introduction">✨ Introduction</a>
 
-Each service runs independently in its own Docker container and communicates asynchronously via RabbitMQ.
+**ZCart** is a **microservice-based e-commerce backend platform** designed for
+scalability, reliability, and real-world production use.
 
-Service | Responsibility | Internal Port
+Each core business domain (Auth, Product, Cart, Order, Payment, etc.) is built as
+an **independent Node.js service**, containerized using Docker, and connected
+through **RabbitMQ for asynchronous communication**.
+
+NGINX acts as a **reverse proxy and API gateway**, providing a single entry point
+for all backend services.
+
+---
+
+## <a name="tech-stack">⚙️ Tech Stack</a>
+
+- **Node.js** – Backend runtime
+- **Express.js** – REST API framework
+- **MongoDB** – Database (per service)
+- **RabbitMQ** – Event-driven message broker
+- **Redis** – Caching & session management
+- **Docker & Docker Compose** – Containerization
+- **NGINX** – Reverse proxy & API gateway
+- **GitHub Actions** – CI/CD automation
+
+---
+
+## <a name="architecture">🧱 Architecture</a>
+
+Each service runs independently in its own Docker container and communicates
+asynchronously via RabbitMQ.
+
+Service | Responsibility | Port
 --- | --- | ---
-Auth | User registration, login, JWT handling | 3000
-Product | Product listing & management | 3001
-Cart | Shopping cart operations | 3002
-Order | Order creation & tracking | 3003
-Payment | Payment processing | 3004
-Notification | Email / notification service | 3005
+Auth | User authentication & JWT | 3000
+Product | Product management | 3001
+Cart | Cart operations | 3002
+Order | Order processing | 3003
+Payment | Payment handling | 3004
+Notification | Email / events | 3005
 Seller | Seller management | 3006
 
-Infrastructure Services:
-- MongoDB – Persistent storage
-- RabbitMQ – Event-based communication
-- Redis – Caching & session management
+Infrastructure:
+- MongoDB – Persistent storage  
+- RabbitMQ – Event messaging  
+- Redis – Cache & sessions  
 
 ---
 
-🌐 Live Backend URLs (Deployed on AWS EC2)
+## <a name="features">🔋 Features</a>
 
-Public Server IP:
-43.205.191.46
-
-
-### 🔀 NGINX API Gateway (Recommended)
-
-Base URL:
-http://43.205.191.46:8080
-
-yaml
-কোড কপি করুন
-
-Example routes:
-http://43.205.191.46:8080/auth
-http://43.205.191.46:8080/products
-http://43.205.191.46:8080/cart
-http://43.205.191.46:8080/orders
-http://43.205.191.46:8080/payments
-
+👉 **Microservice architecture** with domain separation  
+👉 **Event-driven communication** using RabbitMQ  
+👉 **JWT-based authentication** service  
+👉 **NGINX API Gateway** for routing  
+👉 **Dockerized services** for consistency  
+👉 **Scalable backend design**  
+👉 **CI/CD-ready structure**  
 
 ---
 
-### 🔗 Direct Service URLs (Development / Debug)
+## <a name="quick-start">🤸 Quick Start</a>
 
-Service | URL
---- | ---
-Auth | http://43.205.191.46:3000
-Product | http://43.205.191.46:3001
-Cart | http://43.205.191.46:3002
-Order | http://43.205.191.46:3003
-Payment | http://43.205.191.46:3004
-Notification | http://43.205.191.46:3005
-Seller | http://43.205.191.46:3006
+Follow these steps to run **ZCart locally**.
 
----
+### **Prerequisites**
 
-### 🐰 RabbitMQ Management UI
-
-http://43.205.191.46:15673
-Username: guest
-Password: guest
-
+- [Git](https://git-scm.com/)
+- [Node.js](https://nodejs.org/)
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ---
 
-📂 Repository Structure
+### **Cloning the Repository**
 
-ZCart-Ecommerce/
-│
-├── auth/
-├── product/
-├── cart/
-├── order/
-├── payment/
-├── notification/
-├── seller/
-│
-├── env/
-│ ├── auth.env
-│ ├── product.env
-│ ├── cart.env
-│ ├── order.env
-│ ├── payment.env
-│ ├── notification.env
-│ └── seller.env
-│
-├── nginx/
-│ └── nginx.conf
-│
-├── docker-compose.yml
-└── README.md
-
----
-
-🔑 Environment Variables
-
-### Common Variables
-
-MONGO_URI=mongodb://mongo:27017/<DB_NAME>
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-REDIS_HOST=redis
-REDIS_PORT=6379
-REDIS_PASSWORD=
-
-
-### Auth Service (env/auth.env)
-
-PORT=3000
-MONGO_URI=mongodb://mongo:27017/ZCart_Auth
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-REDIS_HOST=redis
-REDIS_PORT=6379
-JWT_SECRET=your_jwt_secret
-
-
-(Other services follow the same pattern with their own DB names.)
-
----
-
-🚀 Deployment & CI/CD Flow
-
-1. Code pushed to `main` branch
-2. GitHub Actions pipeline:
-   - Builds Docker images
-   - Pushes images to Docker Hub
-   - SSH deploys to AWS EC2
-3. Docker Compose pulls latest images
-4. NGINX routes traffic to services
-
----
-
-▶️ Manual Deployment (First Time Only)
-
-docker-compose pull
-docker-compose up -d
-
-
----
-
-🧪 Health & Debugging
-
-Check containers:
-docker ps
-
-
-Check logs:
-docker logs auth-service
-docker logs nginx
-
-
-Check from server:
-curl http://localhost:3000
-
-
----
-
-🔐 Security Notes
-
-❌ Do not commit real secrets  
-✅ Use env files (git-ignored)  
-✅ Restrict direct service ports in production  
-✅ Expose only NGINX (80 / 443) publicly  
-
----
-
-📌 Future Enhancements
-
-- HTTPS with SSL (Certbot)
-- API Gateway improvements
-- Centralized logging (ELK)
-- Kubernetes (EKS)
-- Rate limiting & auth middleware
-- Blue-Green deployments
-
----
-
-👤 Author
-
-Kousik Maiti  
-
-Microservices • Backend • Docker • Cloud • Node.js
-
+```bash
+git clone https://github.com/kousik-devop/ZCart-Ecommerce.git
+cd ZCart-Ecommerce
